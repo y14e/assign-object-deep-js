@@ -10,7 +10,9 @@ export function objectAssignDeep<T extends object, U extends object[]>(target: T
     }
   };
   sources.forEach((source) => {
-    if (!source || typeof source !== 'object') return;
+    if (!source || typeof source !== 'object') {
+      return;
+    }
     Object.entries(source).forEach(([key, sourceValue]) => {
       const targetValue = target[key as keyof T];
       target[key as keyof T] = isPlainObject(sourceValue) && isPlainObject(targetValue) ? objectAssignDeep(targetValue, sourceValue) : safeStructuredClone(sourceValue);
