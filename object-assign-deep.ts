@@ -9,7 +9,7 @@ export function objectAssignDeep<T extends object, U extends object[]>(target: T
       return Array.isArray(value) ? ([...value] as T) : isPlainObject(value) ? (objectAssignDeep({}, value) as T) : value;
     }
   };
-  sources.forEach(source => {
+  sources.forEach((source) => {
     if (!source || typeof source !== 'object') return;
     Object.entries(source).forEach(([key, sourceValue]) => {
       const targetValue = target[key as keyof T];
