@@ -1,6 +1,6 @@
 export function assignObjectDeep(target, ...sources) {
   const isPlainObject = (value) => Object.prototype.toString.call(value) === '[object Object]';
-  const safeStructuredClone = (value) => {
+  const structuredCloneSafe = (value) => {
     try {
       return structuredClone(value);
     } catch {
@@ -13,7 +13,7 @@ export function assignObjectDeep(target, ...sources) {
     }
     Object.entries(source).forEach(([key, sourceValue]) => {
       const targetValue = target[key];
-      target[key] = isPlainObject(sourceValue) && isPlainObject(targetValue) ? assignObjectDeep(targetValue, sourceValue) : safeStructuredClone(sourceValue);
+      target[key] = isPlainObject(sourceValue) && isPlainObject(targetValue) ? assignObjectDeep(targetValue, sourceValue) : structuredCloneSafe(sourceValue);
     });
   });
   return target;
