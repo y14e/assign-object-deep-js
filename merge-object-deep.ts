@@ -1,22 +1,33 @@
+type PlainObject = Record<string, unknown>;
 type UnionToIntersection<U> = (U extends unknown ? (_: U) => unknown : never) extends (_: infer I) => unknown ? I : never;
 
-export function mergeObjectDeep<T extends object, U extends object[]>(target: T, ...sources: U): T & UnionToIntersection<U[number]> {
-  const isPlainObject = (object: unknown): object is Record<string, any> => Object.prototype.toString.call(object) === '[object Object]';
-  const structuredCloneSafe = <T>(object: T): T => {
-    try {
-      return structuredClone(object);
-    } catch {
-      return Array.isArray(object) ? ([...object] as T) : isPlainObject(object) ? (mergeObjectDeep({}, object) as T) : object;
-    }
-  };
-  sources.forEach((source) => {
+export function mergeObjectDeep<T extends PlainObject, U extends PlainObject[]>(target: T, ...sources: U): T & UnionToIntersection<U[number]> {
+  const isPlainObject = (object: unknown): object is PlainObject => Object.prototype.toString.call(object) === '[object Object]';
+  const merge = (target: PlainObject, source: unknown, cache: WeakMap<object, PlainObject>): PlainObject => {
     if (!source || typeof source !== 'object') {
-      return;
+      return target;
     }
-    Object.entries(source).forEach(([key, sourceValue]) => {
-      const targetValue = target[key as keyof T];
-      target[key as keyof T] = isPlainObject(sourceValue) && isPlainObject(targetValue) ? mergeObjectDeep(targetValue, sourceValue) : structuredCloneSafe(sourceValue);
+    if (cache.has(source)) {
+      return cache.get(source)!;
+    }
+    cache.set(source, target);
+    const structuredCloneSafe = (object: unknown): unknown => {
+      try {
+        return structuredClone(object);
+      } catch {
+        return Array.isArray(object) ? [...object] : isPlainObject(object) ? merge({}, object, cache) : object;
+      }
+    };
+    Object.entries(source as PlainObject).forEach(([key, sourceValue]) => {
+      if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+        return;
+      }
+      const targetValue = target[key];
+      target[key] = isPlainObject(sourceValue) && isPlainObject(targetValue) ? merge(targetValue, sourceValue, cache) : structuredCloneSafe(sourceValue);
     });
-  });
+    return target;
+  };
+  const cache = new WeakMap<object, PlainObject>();
+  sources.forEach((source) => merge(target, source, cache));
   return target as T & UnionToIntersection<U[number]>;
 }
