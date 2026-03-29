@@ -7,18 +7,18 @@ export function mergeObjectDeep(target, ...sources) {
       return Array.isArray(object) ? [...object] : isPlainObject(object) ? merge({}, object, cache) : object;
     }
   };
-  const merge = (t, source, cache) => {
-    if (!source || typeof source !== 'object') return t;
+  const merge = (target, source, cache) => {
+    if (!source || typeof source !== 'object') return target;
     if (cache.has(source)) return cache.get(source);
-    cache.set(source, t);
+    cache.set(source, target);
     Object.entries(source).forEach(([key, sourceValue]) => {
       if (key === '__proto__' || key === 'constructor' || key === 'prototype') return;
-      const targetValue = t[key];
-      t[key] = isPlainObject(sourceValue) && isPlainObject(targetValue) ? merge(targetValue, sourceValue, cache) : structuredCloneSafe(sourceValue, cache);
+      const targetValue = target[key];
+      target[key] = isPlainObject(sourceValue) && isPlainObject(targetValue) ? merge(targetValue, sourceValue, cache) : structuredCloneSafe(sourceValue, cache);
     });
-    return t;
+    return target;
   };
   const cache = new WeakMap();
-  sources.forEach((source) => merge(target, source, cache));
+  sources.forEach((source) => void merge(target, source, cache));
   return target;
 }

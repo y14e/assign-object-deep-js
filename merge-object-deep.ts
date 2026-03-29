@@ -17,18 +17,18 @@ export function mergeObjectDeep<T extends PlainObject, U extends PlainObject[]>(
       return object;
     }
   };
-  const merge = (t: PlainObject, source: unknown, cache: Cache): PlainObject => {
-    if (!source || typeof source !== 'object') return t;
+  const merge = (target: PlainObject, source: unknown, cache: Cache): PlainObject => {
+    if (!source || typeof source !== 'object') return target;
     if (cache.has(source)) return cache.get(source)!;
-    cache.set(source, t);
+    cache.set(source, target);
     Object.entries(source as PlainObject).forEach(([key, sourceValue]) => {
       if (key === '__proto__' || key === 'constructor' || key === 'prototype') return;
-      const targetValue = t[key];
-      t[key] = isPlainObject(sourceValue) && isPlainObject(targetValue) ? merge(targetValue, sourceValue, cache) : structuredCloneSafe(sourceValue, cache);
+      const targetValue = target[key];
+      target[key] = isPlainObject(sourceValue) && isPlainObject(targetValue) ? merge(targetValue, sourceValue, cache) : structuredCloneSafe(sourceValue, cache);
     });
-    return t;
+    return target;
   };
   const cache: Cache = new WeakMap();
-  sources.forEach((source) => merge(target, source, cache));
+  sources.forEach((source) => void merge(target, source, cache));
   return target as T & UnionToIntersection<U[number]>;
 }
