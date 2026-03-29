@@ -29,6 +29,6 @@ export function mergeObjectDeep<T extends PlainObject, U extends PlainObject[]>(
     return target;
   };
   const cache: Cache = new WeakMap();
-  sources.forEach((source) => void merge(target, source, cache));
+  sources.forEach((source) => merge(target, source, cache));
   return target as T & UnionToIntersection<U[number]>;
 }

@@ -19,6 +19,6 @@ export function mergeObjectDeep(target, ...sources) {
     return target;
   };
   const cache = new WeakMap();
-  sources.forEach((source) => void merge(target, source, cache));
+  sources.forEach((source) => merge(target, source, cache));
   return target;
 }
